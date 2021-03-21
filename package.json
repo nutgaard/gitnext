@@ -1,6 +1,6 @@
 {
   "name": "@nutgaard/gitnext",
-  "version": "0.0.1-beta.1",
+  "version": "0.0.1-beta.3",
   "description": "Small cli to help prioritize your github tasks",
   "main": "./lib/index.js",
   "bin": {
@@ -17,7 +17,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "chalk": "^4.1.0",
     "ink": "^3.0.8",
@@ -28,7 +30,7 @@
     "javascript-time-ago": "^2.3.4",
     "js-yaml": "^4.0.0",
     "meow": "^9.0.0",
-    "open": "8.0.2",
+    "open": "^8.0.3",
     "react": "^17.0.1"
   },
   "devDependencies": {
