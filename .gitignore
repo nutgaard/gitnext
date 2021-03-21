@@ -1,0 +1,5 @@
+.idea/
+node_modules
+src/fixtures/
+lib/
+config.yaml

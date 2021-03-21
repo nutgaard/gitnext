@@ -1,0 +1,49 @@
+fragment repoData on Repository {
+    name
+    url
+    owner {
+        login
+    }
+    isArchived
+    viewerPermission
+    diskUsage
+    pullRequests(
+        first: 100
+        states: OPEN
+        orderBy: { field: CREATED_AT, direction: ASC }
+    ) {
+        totalCount
+        nodes {
+            author {
+                login
+            }
+            title
+            body
+            bodyText
+            bodyHTML
+            changedFiles
+            url
+            commits {
+                totalCount
+            }
+            headRefName
+            baseRefName
+            createdAt
+            updatedAt
+            lastEditedAt
+            isDraft
+            mergeable
+            reviews(first: 20) {
+                totalCount
+                nodes {
+                    author {
+                        login
+                    }
+                    state
+                    submittedAt
+                    updatedAt
+                }
+            }
+        }
+    }
+}

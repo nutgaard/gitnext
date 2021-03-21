@@ -1,0 +1,10 @@
+fragment teamData on Team {
+    name
+    description
+    repositories {
+        totalCount
+        nodes {
+            ...repoData
+        }
+    }
+}

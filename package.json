@@ -1,0 +1,43 @@
+{
+  "name": "@nutgaard/gitnext",
+  "version": "0.0.1-beta.0",
+  "description": "Small cli to help prioritize your github tasks",
+  "main": "./lib/index.js",
+  "bin": {
+    "gitnext": "./lib/index.js"
+  },
+  "scripts": {
+    "start": "npm run build && node lib/index.js",
+    "create": "npm run build && npm run test",
+    "build": "npm run build:clean && npm run build:tsc && npm run build:copy-resources",
+    "build:clean": "rm -rf lib",
+    "build:tsc": "tsc -p .",
+    "build:copy-resources": "cp -r src/graphql-queries lib && cp src/default-config.yaml lib"
+  },
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "ink": "^3.0.8",
+    "ink-big-text": "^1.2.0",
+    "ink-gradient": "^2.0.0",
+    "ink-select-input": "^4.2.0",
+    "ink-spinner": "^4.0.1",
+    "javascript-time-ago": "^2.3.4",
+    "js-yaml": "^4.0.0",
+    "meow": "^9.0.0",
+    "open": "^8.0.3",
+    "react": "^17.0.1"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/ink": "^2.0.3",
+    "@types/ink-big-text": "^1.2.0",
+    "@types/ink-gradient": "^2.0.1",
+    "@types/javascript-time-ago": "^2.0.2",
+    "@types/js-yaml": "^4.0.0",
+    "@types/node": "^14.14.35",
+    "@types/react": "^17.0.3",
+    "typescript": "^4.2.3"
+  },
+  "author": "Nicklas Utgaard",
+  "license": "MIT"
+}

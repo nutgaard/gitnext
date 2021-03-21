@@ -1,0 +1,13 @@
+query($endCursor: String) {
+    user(login: "{{ USER }}") {
+        repositories(first: 100, after: $endCursor) {
+            nodes {
+                ...repoData
+            }
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+        }
+    }
+}

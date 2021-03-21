@@ -1,0 +1,11 @@
+{
+  "name": "github-api",
+  "extensions": {
+    "endpoints": {
+      "Github GraphQL Endpoint": {
+        "url": "https://api.github.com/graphql",
+        "introspect": false
+      }
+    }
+  }
+}

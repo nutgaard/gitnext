@@ -1,0 +1,14 @@
+sources:
+  - username: __self__                      # __self__ is based on your current user.
+#    ignore:
+#      - repo: [[username]]/[[repo_name]]   # Will ignore this entire repository
+#      - username: [[username]]             # Will ignore pull requests from this user
+#  - organization: [[organization_name]]
+#     Due to how large organizations can be, we have to explicit about which teams and repos we are interested in
+#    include:
+#      - team: [[team_name]]
+#      - repo: [[repo_name]]
+#    ignore:
+#      # In case a team has a repo you're not interested in
+#      - repo: [[organization_name]]/[[repo_name]]
+#      - username: [[username]]

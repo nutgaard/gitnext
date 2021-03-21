@@ -1,0 +1,5 @@
+  {{ KEY }}: organization(login: "{{ ORG }}") {
+    repository(name: "{{ REPO }}") {
+      ...repoData
+    }
+  }

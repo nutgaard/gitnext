@@ -1,0 +1,5 @@
+  {{ KEY }}: organization(login: "{{ ORG }}") {
+    team(slug: "{{ TEAM }}") {
+      ...teamData
+    }
+  }
