@@ -50,7 +50,7 @@ const openHandler: Hotkey<HotkeyContext> = {
         return donePhases.includes(context.phase) && context.pullRequest !== undefined;
     },
     execute(context: HotkeyContext): void {
-        open(context.pullRequest?.url ?? "https://github.com", { wait: true });
+        open(context.pullRequest?.url ?? "https://github.com");
     }
 };
 
