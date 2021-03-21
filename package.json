@@ -14,6 +14,10 @@
     "build:tsc": "tsc -p .",
     "build:copy-resources": "cp -r src/graphql-queries lib && cp src/default-config.yaml lib"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["lib"],
   "dependencies": {
     "chalk": "^4.1.0",
     "ink": "^3.0.8",
@@ -24,7 +28,7 @@
     "javascript-time-ago": "^2.3.4",
     "js-yaml": "^4.0.0",
     "meow": "^9.0.0",
-    "open": "^8.0.3",
+    "open": "8.0.2",
     "react": "^17.0.1"
   },
   "devDependencies": {
