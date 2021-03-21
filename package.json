@@ -1,6 +1,6 @@
 {
   "name": "@nutgaard/gitnext",
-  "version": "0.0.1-beta.0",
+  "version": "0.0.1-beta.1",
   "description": "Small cli to help prioritize your github tasks",
   "main": "./lib/index.js",
   "bin": {
