@@ -1,6 +1,6 @@
 {
   "name": "@nutgaard/gitnext",
-  "version": "0.0.1-beta.4",
+  "version": "0.0.1-beta.5",
   "description": "Small cli to help prioritize your github tasks",
   "main": "./lib/index.js",
   "bin": {
@@ -22,6 +22,7 @@
   ],
   "dependencies": {
     "chalk": "^4.1.0",
+    "emoji-strip": "^1.0.1",
     "ink": "^3.0.8",
     "ink-big-text": "^1.2.0",
     "ink-gradient": "^2.0.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",
+    "@types/emoji-strip": "^1.0.0",
     "@types/ink": "^2.0.3",
     "@types/ink-big-text": "^1.2.0",
     "@types/ink-gradient": "^2.0.1",

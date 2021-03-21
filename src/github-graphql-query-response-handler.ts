@@ -1,3 +1,4 @@
+import emojiStrip from "emoji-strip";
 import {OrganizationSource, RepoReference, UserReference, UserSource} from "./config-types";
 import * as GithubGraphqlType from './github-graphql-type';
 import {exit_error} from "./program-utils";
@@ -12,7 +13,7 @@ function processTeam(ignore: Array<RepoReference | UserReference>, team: GithubG
     return team.repositories.nodes
         .filter((repo) => !repo.isArchived)
         .flatMap((repo) => processRepo(ignore, repo))
-        .map((repo) => ({ ...repo, team: team.name, teamDescription: team.description }));
+        .map((repo) => ({ ...repo, team: team.name, teamDescription: emojiStrip(team.description) }));
 }
 
 function isUserReference(reference: RepoReference | UserReference): reference is UserReference {
@@ -57,8 +58,8 @@ function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
 
     return {
         author: pr.author.login,
-        title: pr.title,
-        body: pr.bodyText,
+        title: emojiStrip(pr.title),
+        body: emojiStrip(pr.bodyText),
         url: pr.url,
         from: pr.headRefName,
         to: pr.baseRefName,
