@@ -26,7 +26,9 @@ function App(props: Props) {
         : <LoaderComponent {...data} />;
 
     useEffect(() => {
-        if (data.data && selectedPullRequest === undefined) {
+        if (data.phase === Phase.GET_DATA_1) {
+            setSelectedPullRequest(undefined);
+        } else if (data.data && selectedPullRequest === undefined) {
             setSelectedPullRequest(data.data[0]);
         }
     }, [data]);
