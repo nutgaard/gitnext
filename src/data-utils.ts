@@ -1,18 +1,14 @@
-import {Priority, PullRequest, Repository} from "./domain";
+import {Priority, PullRequest} from "./domain";
 
-export function uniqueRepos(repos: Repository[]): Repository[] {
-    const set: { [key: string]: Repository[] } = {};
-    repos.forEach((repo) => {
-        const name = repo.url;
-        const group = set[name] || [];
-        group.push(repo);
-        set[name] = group;
-    });
-    return Object.values(set)
-        .map((list_of_similar_repos) => {
-            const any_with_team = list_of_similar_repos.find((repo) => repo.team);
-            return any_with_team ? any_with_team : list_of_similar_repos[0];
-        })
+export function uniqueBy<T>(list: T[], extractKey: (t: T) => string): T[] {
+    const cache: { [key: string]: T } = {};
+    for (const element of list) {
+        const key = extractKey(element);
+        if (!cache[key]) {
+            cache[key] = element;
+        }
+    }
+    return Object.values(cache);
 }
 
 export function pull_request_classifier_factory(name: string) {

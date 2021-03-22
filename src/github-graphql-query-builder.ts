@@ -2,10 +2,11 @@ import fs from 'fs';
 import {Config, OrganizationSource, RepoReference, TeamReference, UserSource} from "./config-types";
 import {exit_error} from "./program-utils";
 import * as GithubGraphQLHandler from './github-graphql-query-response-handler';
-import {Repository} from "./domain";
+import {PullRequest} from "./domain";
 
 const team_fragment = fs.readFileSync(__dirname + '/graphql-queries/team-fragment.graphql', 'utf8');
 const repo_fragment = fs.readFileSync(__dirname + '/graphql-queries/repo-fragment.graphql', 'utf8');
+const pullrequest_fragment = fs.readFileSync(__dirname + '/graphql-queries/pullrequest-fragment.graphql', 'utf8');
 const user_repo_query = fs.readFileSync(__dirname + '/graphql-queries/get-user-repos.graphql', 'utf8');
 const org_repo_subquery = fs.readFileSync(__dirname + '/graphql-queries/org-repo-subquery.graphql', 'utf8');
 const team_subquery = fs.readFileSync(__dirname + '/graphql-queries/team-subquery.graphql', 'utf8');
@@ -23,7 +24,7 @@ function keyOf(key: string): string {
 export interface Query {
     query: string;
     paginateInfo?: string;
-    postProcess: (config: any, data: any) => Repository[];
+    postProcess: (config: any, data: any) => PullRequest[];
     config: any;
 }
 interface ConfigHandler {
@@ -45,11 +46,12 @@ const config_handlers: Array<ConfigHandler> = [
     },
 ];
 
-function build_user_query(user: string, config: UserSource) {
+function build_user_query(user: string, config: UserSource): Query {
     const buffer = [];
     const requestedUser = config.username === '__self__' ? user : config.username;
     buffer.push(replaceVars(user_repo_query, {USER: requestedUser}));
     buffer.push(repo_fragment);
+    buffer.push(pullrequest_fragment);
     return {
         query: buffer.join('\n'),
         paginateInfo: 'data.user.repositories.pageInfo',
@@ -58,7 +60,7 @@ function build_user_query(user: string, config: UserSource) {
     };
 }
 
-function build_org_query(user: string, config: OrganizationSource) {
+function build_org_query(user: string, config: OrganizationSource): Query {
     const buffer = [];
     const organization = config.organization;
     let has_team_subquery = false;
@@ -103,6 +105,7 @@ function build_org_query(user: string, config: OrganizationSource) {
     }
     if (has_repo_subquery) {
         buffer.push(repo_fragment);
+        buffer.push(pullrequest_fragment);
     }
 
     return {

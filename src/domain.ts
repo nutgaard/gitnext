@@ -1,13 +1,11 @@
 export interface Repository {
-    name: string;
     url: string;
     owner: string;
-    pullRequests: Array<PullRequest>;
-    team?: string;
-    teamDescription?: string;
+    name: string;
 }
 
 export interface PullRequest {
+    baseRepository: Repository;
     author: string;
     title: string;
     body: string;

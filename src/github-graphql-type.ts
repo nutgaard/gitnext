@@ -5,7 +5,8 @@ type Countable<T> = T extends never
 export interface UserResponse {
     data: {
         user: {
-            repositories: Countable<Repository> & PageInfo
+            pullRequests: Countable<PullRequest>;
+            repositories: Countable<Repository> & PageInfo;
         }
     }
 }
@@ -60,6 +61,11 @@ export interface PullRequest {
     bodyHTML: string;
     changedFiles: number;
     url: string;
+    baseRepository: {
+        name: string;
+        url: string;
+        owner: Owner;
+    };
     commits: Countable<never>;
     headRefName: string;
     baseRefName: string;

@@ -1,0 +1,39 @@
+fragment pullrequestData on PullRequest {
+    author {
+        login
+    }
+    title
+    body
+    bodyText
+    bodyHTML
+    changedFiles
+    url
+    baseRepository {
+        name
+        url
+        owner {
+            login
+        }
+    }
+    commits {
+        totalCount
+    }
+    headRefName
+    baseRefName
+    createdAt
+    updatedAt
+    lastEditedAt
+    isDraft
+    mergeable
+    reviews(first: 20) {
+        totalCount
+        nodes {
+            author {
+                login
+            }
+            state
+            submittedAt
+            updatedAt
+        }
+    }
+}

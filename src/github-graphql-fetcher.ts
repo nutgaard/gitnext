@@ -1,7 +1,7 @@
 import * as GraphQLFetch from './graphql-fetch';
 import {Query} from "./github-graphql-query-builder";
 import {RepoReference, UserReference} from "./config-types";
-import {Repository} from "./domain";
+import {PullRequest} from "./domain";
 import * as Fixtures from './fixtures/fixtures';
 import { useFixtures } from './program-config';
 
@@ -27,7 +27,7 @@ function createPaginator<T>(paginateInfo: string | undefined): Paginator<T> {
 function isRepoReference(reference: RepoReference | UserReference): reference is RepoReference {
     return reference.hasOwnProperty('repo');
 }
-function build_filter(ignore_config: Array<RepoReference | UserReference>): (repository: Repository) => boolean {
+function build_filter(ignore_config: Array<RepoReference | UserReference>): (repository: PullRequest) => boolean {
     const pass = () => true;
     const ignore_checks = ignore_config
         .map((reference) => {
@@ -38,11 +38,11 @@ function build_filter(ignore_config: Array<RepoReference | UserReference>): (rep
             }
         })
     return (repo) => {
-        return ignore_checks.every((check) => check(repo.owner, repo.name));
+        return ignore_checks.every((check) => check(repo.baseRepository.owner, repo.baseRepository.name));
     }
 }
 
-export async function fetch(token: string, query_config: Query): Promise<Repository[]> {
+export async function fetch(token: string, query_config: Query): Promise<PullRequest[]> {
     const { query, paginateInfo, postProcess, config } = query_config;
     let data = [];
     if (useFixtures) {

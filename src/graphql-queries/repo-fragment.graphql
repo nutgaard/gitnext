@@ -14,36 +14,7 @@ fragment repoData on Repository {
     ) {
         totalCount
         nodes {
-            author {
-                login
-            }
-            title
-            body
-            bodyText
-            bodyHTML
-            changedFiles
-            url
-            commits {
-                totalCount
-            }
-            headRefName
-            baseRefName
-            createdAt
-            updatedAt
-            lastEditedAt
-            isDraft
-            mergeable
-            reviews(first: 20) {
-                totalCount
-                nodes {
-                    author {
-                        login
-                    }
-                    state
-                    submittedAt
-                    updatedAt
-                }
-            }
+            ...pullrequestData
         }
     }
 }

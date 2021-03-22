@@ -3,9 +3,9 @@ import {load_and_validate} from "../config-loader";
 import * as GH from "../gh-utils";
 import * as GithubQueryBuilder from "../github-graphql-query-builder";
 import {Query} from "../github-graphql-query-builder";
-import {PrioritizedPullRequest, Repository} from "../domain";
+import {Repository, PrioritizedPullRequest, PullRequest} from "../domain";
 import * as Fetcher from "../github-graphql-fetcher";
-import {pull_request_classifier_factory, uniqueRepos} from "../data-utils";
+import {pull_request_classifier_factory, uniqueBy} from "../data-utils";
 import React, {useCallback, useEffect, useState} from "react";
 import Spinner from "ink-spinner";
 import {Box, Text} from "ink";
@@ -103,23 +103,28 @@ export function useLoader(): LoaderData {
                     }
                     case Phase.GET_DATA_1: {
                         const queries: Query[] = GithubQueryBuilder.build_query(whoami!!.name, config!!);
-                        const repositories: Array<Repository[]> = await Promise.all(queries.map((query) =>
+                        const data: Array<PullRequest[]> = await Promise.all(queries.map((query) =>
                             Fetcher.fetch(token!!.token, query)
                         ));
-                        const all_repos: Repository[] = repositories.reduce((a, b) => a.concat(b), []);
+                        const all_pullrequets: PrioritizedPullRequest[] = data
+                            .reduce((a, b) => a.concat(b), [])
+                            .map((pr) => ({...pr, priority: 0 }));
+                        const all_repos: Repository[] = all_pullrequets.map((pr) => pr.baseRepository)
+
+                        setPullRequests(uniqueBy(all_pullrequets, (pr) => pr.url));
                         setRepositories(all_repos);
                         setPhase(Phase.GET_DATA_2);
                         return;
                     }
                     case Phase.GET_DATA_2: {
-                        setRepositories(uniqueRepos(repositories))
+                        const unique_repos: Repository[] = uniqueBy(repositories, (repo) => repo.url);
+                        setRepositories(unique_repos);
                         setPhase(Phase.GET_DATA_3);
                         return;
                     }
                     case Phase.GET_DATA_3: {
                         const pr_classifier = pull_request_classifier_factory(whoami!!.name)
-                        const prs_prioritized: PrioritizedPullRequest[] = repositories!!
-                            .flatMap((repo) => repo.pullRequests)
+                        const prs_prioritized: PrioritizedPullRequest[] = pullRequests!!
                             .map((pr) => ({...pr, priority: pr_classifier(pr)}))
                             .sort((a, b) => b.priority - a.priority);
                         setPullRequests(prs_prioritized);

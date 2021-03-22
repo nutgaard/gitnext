@@ -1,5 +1,10 @@
 query($endCursor: String) {
     user(login: "{{ USER }}") {
+        pullRequests(states: [OPEN], first: 100) {
+            nodes {
+                ...pullrequestData
+            }
+        }
         repositories(first: 100, after: $endCursor) {
             nodes {
                 ...repoData

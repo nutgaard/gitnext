@@ -2,26 +2,26 @@ import emojiStrip from "emoji-strip";
 import {OrganizationSource, RepoReference, UserReference, UserSource} from "./config-types";
 import * as GithubGraphqlType from './github-graphql-type';
 import {exit_error} from "./program-utils";
-import { Repository, PullRequest, Review } from './domain';
+import { PullRequest, Review } from './domain';
+import {uniqueBy} from "./data-utils";
 
 const acceptedPermissions: GithubGraphqlType.RepositoryPermissions[] = ['ADMIN', 'WRITE', 'MAINTAIN'];
 function hasAccess(repo: GithubGraphqlType.Repository) {
     return acceptedPermissions.includes(repo.viewerPermission);
 }
 
-function processTeam(ignore: Array<RepoReference | UserReference>, team: GithubGraphqlType.Team): Repository[] {
+function processTeam(ignore: Array<RepoReference | UserReference>, team: GithubGraphqlType.Team): PullRequest[] {
     return team.repositories.nodes
         .filter((repo) => !repo.isArchived)
-        .flatMap((repo) => processRepo(ignore, repo))
-        .map((repo) => ({ ...repo, team: team.name, teamDescription: emojiStrip(team.description) }));
+        .flatMap((repo) => processRepo(ignore, repo));
 }
 
 function isUserReference(reference: RepoReference | UserReference): reference is UserReference {
     return reference.hasOwnProperty('username');
 }
 
-function processRepo(ignore: Array<RepoReference | UserReference>, repo: GithubGraphqlType.Repository): Repository[] {
-    const pullRequests: PullRequest[] = repo.pullRequests.nodes
+function processRepo(ignore: Array<RepoReference | UserReference>, repo: GithubGraphqlType.Repository): PullRequest[] {
+    return repo.pullRequests.nodes
         .map(processPullRequest)
         .filter((pr) => {
             return ignore.every((ignore_check) => {
@@ -32,13 +32,6 @@ function processRepo(ignore: Array<RepoReference | UserReference>, repo: GithubG
                 }
             });
         });
-    const repo_data: Repository = {
-        name: repo.name,
-        url: repo.url,
-        owner: repo.owner.login,
-        pullRequests
-    }
-    return [repo_data];
 }
 
 function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
@@ -57,6 +50,11 @@ function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
         });
 
     return {
+        baseRepository: {
+            owner: pr.baseRepository.owner.login,
+            name: pr.baseRepository.name,
+            url: pr.baseRepository.url
+        },
         author: pr.author.login,
         title: emojiStrip(pr.title),
         body: emojiStrip(pr.bodyText),
@@ -71,14 +69,17 @@ function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
     };
 }
 
-export function userQuery(config: UserSource, data: GithubGraphqlType.UserResponse[]): Repository[] {
+export function userQuery(config: UserSource, data: GithubGraphqlType.UserResponse[]): PullRequest[] {
     return data
         .flatMap((page) => {
-            const repositories = page.data.user.repositories.nodes;
-            return repositories
+            const pullrequests: PullRequest[] = page.data.user.pullRequests.nodes
+                .map(processPullRequest);
+            const repo_pullrequests = page.data.user.repositories.nodes
                 .filter(hasAccess)
                 .filter((repo) => !repo.isArchived)
-                .flatMap((repo) => processRepo(config.ignore, repo))
+                .flatMap((repo) => processRepo(config.ignore, repo));
+
+            return uniqueBy(pullrequests.concat(repo_pullrequests), (pr) => pr.url);
         });
 }
 
@@ -86,7 +87,7 @@ function isTeamResponse(key: string, response: GithubGraphqlType.TeamResponse | 
     return key.startsWith('team_'); 
 }
 
-export function orgQuery(config: OrganizationSource, data: GithubGraphqlType.OrganizationResponse[]): Repository[] {
+export function orgQuery(config: OrganizationSource, data: GithubGraphqlType.OrganizationResponse[]): PullRequest[] {
     data.length > 1 && exit_error('org query should never be paginated, found ' + data.length + ' pages.')
     const page = data[0];
     return Object.entries(page.data)
