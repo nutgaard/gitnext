@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
-import { Box, Text } from 'ink'
-import {PrioritizedPullRequest} from "../domain";
-import Select from 'ink-select-input'
+import {Box, Text, Spacer} from 'ink'
+import {PrioritizedPullRequest, UpdateState} from "../domain";
+import Select, {ItemProps} from 'ink-select-input'
 import * as style from './style';
 import {ellipsis} from "./text-utils";
 
@@ -15,16 +15,33 @@ interface Props {
 
 function Indicator({ isSelected }: { isSelected?: boolean; }) {
     return (
-        <Box marginRight={1}>
+        <Box marginRight={0}>
             {isSelected ? <Text color={style.gradientStart}>{'>'}</Text> : <Text> </Text>}
         </Box>
+    );
+}
+
+const Item: React.FC<ItemProps> = (props: ItemProps) => {
+    // Needed hack to bypass restriction in typesetting
+    const castedProps = props as ( ItemProps & { value: PrioritizedPullRequest });
+    let updated = <Text>  </Text>;
+    if (castedProps.value.update_state === UpdateState.NEW) {
+        updated = <Text color={style.greenAccent}>★ </Text>
+    } else if (castedProps.value.update_state === UpdateState.UPDATED) {
+        updated = <Text color={style.gradientEnd}>★ </Text>
+    }
+    return (
+        <>
+            {updated}
+            <Text color={props.isSelected ? 'blue' : undefined}>{props.label}</Text>
+        </>
     );
 }
 
 function PullRequestListSelector(props: Props) {
     const items = props.pullRequests.map((pr) => ({
         ...pr,
-        label: ellipsis(pr.title, 65),
+        label: ellipsis(pr.title, 64),
         key: pr.url,
         value: pr
     }));
@@ -49,9 +66,21 @@ function PullRequestListSelector(props: Props) {
                 isFocused={true}
                 items={items}
                 indicatorComponent={Indicator}
-                limit={props.rows - 3}
+                itemComponent={Item}
+                limit={props.rows - 5}
                 onHighlight={(item) => props.setSelectedPullRequest(item.value)}
             />
+            <Spacer />
+            <Box marginLeft={1}>
+                <Box marginRight={4}>
+                    <Text color={style.greenAccent}>★ </Text>
+                    <Text>New</Text>
+                </Box>
+                <Box>
+                    <Text color={style.gradientEnd}>★ </Text>
+                    <Text>Changed</Text>
+                </Box>
+            </Box>
         </Box>
     );
 }

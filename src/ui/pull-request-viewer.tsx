@@ -55,7 +55,7 @@ function PullRequestViewer(props: Props) {
             marginBottom: 1
         },
         <Spacer/>,
-        {title: 'Action', content: followUp(pullRequest.priority), marginBottom: 1}
+        {title: 'Action', content: followUp(pullRequest.priority)}
     ];
 
     return (

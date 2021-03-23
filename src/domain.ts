@@ -27,9 +27,15 @@ export enum Priority {
     MISSING_REVIEW_FROM_USER = 90,
     NO_REVIEWS = 100,
 }
+export enum UpdateState {
+    NO_CHANGE,
+    NEW,
+    UPDATED
+}
 
 export interface PrioritizedPullRequest extends PullRequest {
-    priority: Priority
+    priority: Priority;
+    update_state: UpdateState
 }
 
 export interface Review {

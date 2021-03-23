@@ -1,17 +1,17 @@
 import {Config} from "../config-types";
 import {load_and_validate} from "../config-loader";
 import * as GH from "../gh-utils";
+import {AuthToken, WhoAmI} from "../gh-utils";
 import * as GithubQueryBuilder from "../github-graphql-query-builder";
 import {Query} from "../github-graphql-query-builder";
-import {Repository, PrioritizedPullRequest, PullRequest} from "../domain";
+import {PrioritizedPullRequest, PullRequest, Repository, UpdateState} from "../domain";
 import * as Fetcher from "../github-graphql-fetcher";
 import {pull_request_classifier_factory, uniqueBy} from "../data-utils";
 import React, {useCallback, useEffect, useState} from "react";
 import Spinner from "ink-spinner";
 import {Box, Text} from "ink";
 import {useScreenSize} from "./fullscreen";
-import {AuthToken, WhoAmI} from "../gh-utils";
-import { error_message } from '../program-utils';
+import {error_message} from '../program-utils';
 
 export enum Phase {
     INIT = 'Initializing...',
@@ -106,9 +106,26 @@ export function useLoader(): LoaderData {
                         const data: Array<PullRequest[]> = await Promise.all(queries.map((query) =>
                             Fetcher.fetch(token!!.token, query)
                         ));
+                        const previousMap: Record<string, PrioritizedPullRequest>= pullRequests
+                            .reduce((acc, el) => {
+                                acc[el.url] = el;
+                                return acc;
+                            }, {} as Record<string, PrioritizedPullRequest>);
+
                         const all_pullrequets: PrioritizedPullRequest[] = data
                             .reduce((a, b) => a.concat(b), [])
-                            .map((pr) => ({...pr, priority: 0 }));
+                            .map((pr, i) => {
+                                let update_state = UpdateState.NO_CHANGE;
+                                const previous: PrioritizedPullRequest | undefined = previousMap[pr.url];
+                                // TODO we probably should store the results, and that way we can compare with previous version on startup
+                                // This is kinda hacky, but should go away in daemonized version
+                                if (hasBeenDone && previous === undefined) {
+                                    update_state = UpdateState.NEW;
+                                } else if (hasBeenDone && previous.updatedAt !== pr.updatedAt) {
+                                    update_state = UpdateState.UPDATED
+                                }
+                                return ({...pr, priority: 0, update_state });
+                            });
                         const all_repos: Repository[] = all_pullrequets.map((pr) => pr.baseRepository)
 
                         setPullRequests(uniqueBy(all_pullrequets, (pr) => pr.url));

@@ -3,7 +3,7 @@ import {load_and_validate} from "./config-loader";
 import * as GH from "./gh-utils";
 import {Query} from "./github-graphql-query-builder";
 import * as GithubQueryBuilder from "./github-graphql-query-builder";
-import {PrioritizedPullRequest, PullRequest} from "./domain";
+import {PrioritizedPullRequest, PullRequest, UpdateState} from "./domain";
 import * as Fetcher from "./github-graphql-fetcher";
 import {pull_request_classifier_factory} from "./data-utils";
 
@@ -25,7 +25,7 @@ export async function debugProgram() {
 
     const pr_classifier = pull_request_classifier_factory(whoami.name)
     const prs_prioritized: PrioritizedPullRequest[] = pullRequests
-        .map((pr) => ({...pr, priority: pr_classifier(pr)}))
+        .map((pr) => ({...pr, priority: pr_classifier(pr), update_state: UpdateState.NO_CHANGE }))
         .sort((a, b) => b.priority - a.priority);
 
     console.log('prs', prs_prioritized);

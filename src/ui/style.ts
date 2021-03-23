@@ -24,6 +24,7 @@ type InkBoxBorder =
 export const gradient: InkGradientTypes = 'passion';
 export const gradientStart: string = '#f43b47';
 export const gradientEnd: string = '#453a94';
+export const greenAccent: string = '#40943a';
 
 /**
  * Should be releated to `gradient`, colors found here;
