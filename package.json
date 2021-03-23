@@ -1,10 +1,14 @@
 {
   "name": "@nutgaard/gitnext",
-  "version": "0.0.1-beta.8",
+  "version": "0.0.1-beta.9",
   "description": "Small cli to help prioritize your github tasks",
   "main": "./lib/index.js",
   "bin": {
     "gitnext": "./lib/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nutgaard/gitnext"
   },
   "scripts": {
     "start": "npm run build && node lib/index.js",
@@ -18,7 +22,8 @@
     "access": "public"
   },
   "files": [
-    "lib"
+    "lib",
+    "media"
   ],
   "dependencies": {
     "chalk": "^4.1.0",
