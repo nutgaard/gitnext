@@ -34,7 +34,7 @@ const leftColumnPercentage = 0.35;
 interface Props {
     pullRequests: PrioritizedPullRequest[];
     selectedPullRequest: PrioritizedPullRequest | undefined;
-    setSelectedPullRequest: (value: PrioritizedPullRequest) => void;
+    setSelectedPullRequest: (value: PrioritizedPullRequest | undefined) => void;
 }
 function PullRequestListViewer(props: Props) {
     const size = useScreenSize();
@@ -42,7 +42,7 @@ function PullRequestListViewer(props: Props) {
     const rightColumnSize = size.columns - leftColumnSize;
     const maxHeight = size.rows - LOGO_SIZE;
 
-    if (props.selectedPullRequest === undefined) {
+    if (props.pullRequests.length === 0) {
         return <NoPullRequests/>
     }
 
@@ -57,7 +57,7 @@ function PullRequestListViewer(props: Props) {
                 rows={maxHeight}
                 pullRequests={props.pullRequests}
                 selectedPR={props.selectedPullRequest}
-                setSelectedPr={props.setSelectedPullRequest}
+                setSelectedPullRequest={props.setSelectedPullRequest}
             />
             <PullRequestViewer
                 columns={rightColumnSize}

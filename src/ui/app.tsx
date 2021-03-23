@@ -25,14 +25,6 @@ function App(props: Props) {
         )
         : <LoaderComponent {...data} />;
 
-    useEffect(() => {
-        if (data.phase === Phase.GET_DATA_1) {
-            setSelectedPullRequest(undefined);
-        } else if (data.data && selectedPullRequest === undefined) {
-            setSelectedPullRequest(data.data[0]);
-        }
-    }, [data]);
-
     return (
         <ScreenSizeContext.Provider value={size}>
             <Box flexDirection="column" width={size.columns} height={size.rows}>

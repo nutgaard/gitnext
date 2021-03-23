@@ -13,7 +13,7 @@ const timeAgo = new TimeAgo();
 interface Props {
     columns: number;
     rows: number;
-    pullRequest: PrioritizedPullRequest;
+    pullRequest: PrioritizedPullRequest | undefined;
 }
 
 function followUp(priority: Priority): string {
@@ -35,6 +35,10 @@ function followUp(priority: Priority): string {
 
 function PullRequestViewer(props: Props) {
     const {columns, pullRequest} = props;
+
+    if (pullRequest === undefined) {
+        return null;
+    }
 
     const lastUpdated: Date = new Date(pullRequest.updatedAt ?? pullRequest.createdAt);
     const attributes: Array<Attribute | React.ReactElement> = [

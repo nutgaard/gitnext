@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Box, Text } from 'ink'
 import {PrioritizedPullRequest} from "../domain";
 import Select from 'ink-select-input'
@@ -10,7 +10,7 @@ interface Props {
     rows: number;
     pullRequests: PrioritizedPullRequest[];
     selectedPR: PrioritizedPullRequest | undefined;
-    setSelectedPr: (select: PrioritizedPullRequest) => void;
+    setSelectedPullRequest: (select: PrioritizedPullRequest | undefined) => void;
 }
 
 function Indicator({ isSelected }: { isSelected?: boolean; }) {
@@ -28,6 +28,16 @@ function PullRequestListSelector(props: Props) {
         key: pr.url,
         value: pr
     }));
+    const keys = items.map(({ key }) => key).join('||');
+
+    useEffect(() => {
+        if (props.pullRequests.length > 0) {
+            props.setSelectedPullRequest(props.pullRequests[0]);
+        } else {
+            props.setSelectedPullRequest(undefined);
+        }
+    }, [keys]);
+
     return (
         <Box
             width={props.columns}
@@ -40,7 +50,7 @@ function PullRequestListSelector(props: Props) {
                 items={items}
                 indicatorComponent={Indicator}
                 limit={props.rows - 3}
-                onHighlight={(item) => props.setSelectedPr(item.value)}
+                onHighlight={(item) => props.setSelectedPullRequest(item.value)}
             />
         </Box>
     );
