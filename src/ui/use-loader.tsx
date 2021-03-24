@@ -114,6 +114,7 @@ export function useLoader(): LoaderData {
 
                         const all_pullrequets: PrioritizedPullRequest[] = data
                             .reduce((a, b) => a.concat(b), [])
+                            .filter((pr) => !pr.isDraft)
                             .map((pr, i) => {
                                 let update_state = UpdateState.NO_CHANGE;
                                 const previous: PrioritizedPullRequest | undefined = previousMap[pr.url];
