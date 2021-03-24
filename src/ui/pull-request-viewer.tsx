@@ -47,7 +47,8 @@ function PullRequestViewer(props: Props) {
         {title: 'Title', content: pullRequest.title},
         {title: 'Author', content: pullRequest.author},
         {title: 'Updated', content: timeAgo.format(lastUpdated) },
-        {title: 'URL', content: pullRequest.url, marginBottom: 1},
+        {title: 'URL', content: pullRequest.url},
+        {title: 'Target', content: pullRequest.to, marginBottom: 1},
         {
             title: 'Body',
             content: ellipsis_textbox(
