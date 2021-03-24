@@ -28,6 +28,8 @@ function followUp(priority: Priority): string {
             return "Your PR has been approved. Merge it?"
         case Priority.PENDING_PR_FROM_USER:
             return "Your PR has no reviews :( "
+        case Priority.PR_REJECTED_BY_USER:
+            return "You've requested changes to this PR"
         case Priority.NO_NEED_FOR_ACTION:
             return "All good. Author should be merging this anytime."
     }

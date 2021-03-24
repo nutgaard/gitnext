@@ -21,6 +21,7 @@ export interface PullRequest {
 
 export enum Priority {
     NO_NEED_FOR_ACTION = 0,
+    PR_REJECTED_BY_USER = 10,
     PENDING_PR_FROM_USER = 60,
     APPROVED_PR_FROM_USER = 70,
     REJECTED_PR_FROM_USER = 80,
