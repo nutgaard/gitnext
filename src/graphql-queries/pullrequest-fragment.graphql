@@ -25,7 +25,7 @@ fragment pullrequestData on PullRequest {
     lastEditedAt
     isDraft
     mergeable
-    reviews(first: 20) {
+    latestReviews(first: 20) {
         totalCount
         nodes {
             author {

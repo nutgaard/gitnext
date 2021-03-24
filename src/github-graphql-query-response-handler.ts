@@ -36,7 +36,7 @@ function processRepo(ignore: Array<RepoReference | UserReference>, repo: GithubG
 
 function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
     const reviewers: { [key: string]: Review } = {};
-    pr.reviews.nodes
+    pr.latestReviews.nodes
         .filter((review) => review.state !== 'COMMENTED')
         .sort((a, b) => (a.updatedAt ?? a.submittedAt).localeCompare(b.updatedAt ?? b.submittedAt))
         .forEach((review) => {
