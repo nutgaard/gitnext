@@ -36,4 +36,14 @@ fragment pullrequestData on PullRequest {
             updatedAt
         }
     }
+    latestOpinionatedReviews(first: 20) {
+        nodes {
+            author {
+                login
+            }
+            state
+            submittedAt
+            updatedAt
+        }
+    }
 }

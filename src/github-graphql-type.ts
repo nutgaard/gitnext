@@ -74,7 +74,8 @@ export interface PullRequest {
     lastEditedAt: string | null;
     isDraft: boolean;
     mergeable: 'MERGEABLE' | 'CONFLICTING';
-    latestReviews: Countable<Review>
+    latestReviews: Countable<Review>;
+    latestOpinionatedReviews: Countable<Review>;
 }
 
 interface Review {

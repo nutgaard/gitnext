@@ -36,9 +36,15 @@ function processRepo(ignore: Array<RepoReference | UserReference>, repo: GithubG
 
 function processPullRequest(pr: GithubGraphqlType.PullRequest): PullRequest {
     const reviewers: { [key: string]: Review } = {};
-    pr.latestReviews.nodes
-        .filter((review) => review.state !== 'COMMENTED')
+    /**
+     * A user who has given an APPROVE/REQUEST_CHANGE review,
+     * is present in latestReviews if-and-only-if we are not pending a new review from that user.
+     * Hence we can use it figure out if we're waiting for a new review from that user.
+     */
+    const usersWithoutPendingReview = pr.latestReviews.nodes.map((review) => review.author.login);
+    pr.latestOpinionatedReviews.nodes
         .sort((a, b) => (a.updatedAt ?? a.submittedAt).localeCompare(b.updatedAt ?? b.submittedAt))
+        .filter((review) => usersWithoutPendingReview.includes(review.author.login))
         .forEach((review) => {
             const data : Review = {
                 reviewer: review.author.login,
