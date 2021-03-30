@@ -1,8 +1,8 @@
 import { red } from 'chalk';
 import { printStacktrace, debugMode } from './program-config';
 
-export function runAsync(fn: any) {
-    (async () => { await fn(); })();
+export function runAsync(fn: any, ...args: any[]) {
+    (async () => { await fn(...args); })();
 }
 
 export function exit_error(message: string) {

@@ -1,33 +1,17 @@
-import {Config} from "./config-types";
-import {load_and_validate} from "./config-loader";
-import * as GH from "./gh-utils";
-import {Query} from "./github-graphql-query-builder";
-import * as GithubQueryBuilder from "./github-graphql-query-builder";
-import {PrioritizedPullRequest, PullRequest, UpdateState} from "./domain";
-import * as Fetcher from "./github-graphql-fetcher";
-import {pull_request_classifier_factory} from "./data-utils";
+import {AsyncConnectionFactory} from "./server/async-loading/async-controller";
+import {ClientSentEvents, writeClientMessage} from "./common/ws-message-formats";
+import {Program} from "./index";
 
-export async function debugProgram() {
+export const debugProgram: Program = async (connectionFactory: AsyncConnectionFactory) => {
     console.log('Started debug program....')
     console.log('-------------------------')
     console.log();
+    const connection = connectionFactory.connect();
+    connection.on('message', (data) => {
+        console.log('debug', data);
+    });
+    connection.on('open', () => {
+        connection.send(writeClientMessage({ type: ClientSentEvents.LOAD_DATA }));
+    });
 
-    const config: Config = load_and_validate();
-    const whoami = await GH.whoami();
-    const token = await GH.findAuthToken();
-
-    const queries: Query[] = GithubQueryBuilder.build_query(whoami.name, config);
-    const responses: Array<PullRequest[]> = await Promise.all(queries.map((query) =>
-        Fetcher.fetch(token.token, query)
-    ));
-
-    const pullRequests: PullRequest[] = responses.reduce((a, b) => a.concat(b), []);
-
-    const pr_classifier = pull_request_classifier_factory(whoami.name)
-    const prs_prioritized: PrioritizedPullRequest[] = pullRequests
-        .map((pr) => ({...pr, priority: pr_classifier(pr), update_state: UpdateState.NO_CHANGE }))
-        .sort((a, b) => b.priority - a.priority);
-
-    console.log('prs', prs_prioritized);
-    console.log('prs', prs_prioritized.length);
-}
+};

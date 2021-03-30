@@ -46,7 +46,7 @@ const config_handlers: Array<ConfigHandler> = [
     },
 ];
 
-function build_user_query(user: string, config: UserSource): Query {
+export function build_user_query(user: string, config: UserSource): Query {
     const buffer = [];
     const requestedUser = config.username === '__self__' ? user : config.username;
     buffer.push(replaceVars(user_repo_query, {USER: requestedUser}));
@@ -60,7 +60,7 @@ function build_user_query(user: string, config: UserSource): Query {
     };
 }
 
-function build_org_query(user: string, config: OrganizationSource): Query {
+export function build_org_query(user: string, config: OrganizationSource): Query {
     const buffer = [];
     const organization = config.organization;
     let has_team_subquery = false;
