@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react';
 import {Box, Text, Spacer} from 'ink'
 import {PrioritizedPullRequest, UpdateState} from "../domain";
-import Select, {ItemProps} from 'ink-select-input'
+import Select, {ItemProps} from 'ink-select-input';
 import * as style from './style';
 import {ellipsis} from "./text-utils";
 
@@ -41,7 +41,7 @@ const Item: React.FC<ItemProps> = (props: ItemProps) => {
 function PullRequestListSelector(props: Props) {
     const items = props.pullRequests.map((pr) => ({
         ...pr,
-        label: ellipsis(pr.title, 64),
+        label: ellipsis(pr.title, props.columns - 5),
         key: pr.url,
         value: pr
     }));
