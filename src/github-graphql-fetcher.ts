@@ -1,6 +1,6 @@
 import * as GraphQLFetch from './graphql-fetch';
 import {Query} from "./github-graphql-query-builder";
-import {RepoReference, UserReference} from "./config-types";
+import {RepoReference, UserReference} from "./config/config-types";
 import {PullRequest} from "./domain";
 import * as Fixtures from './fixtures/fixtures';
 import { useFixtures } from './program-config';

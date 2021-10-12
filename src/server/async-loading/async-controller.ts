@@ -6,17 +6,17 @@ import {
     writeServerMessage
 } from "../../common/ws-message-formats";
 import AsyncLoader from "./async-loader";
+import * as Log from '../logging';
 
 export interface AsyncConnectionFactory {
     connect(): AsyncConnection;
+    exit(): void;
 }
 export interface AsyncConnection {
     send(data: string): void;
     on(event: 'message' | 'open', listener: (data: AsyncData) => void): void;
 }
-export interface AsyncData {
-    toString(): string;
-}
+export type AsyncData = string;
 
 class AsyncController<CONNECTION_TYPE extends AsyncConnection, DATA extends AsyncData> {
     private connections: Array<CONNECTION_TYPE> = [];
@@ -31,7 +31,7 @@ class AsyncController<CONNECTION_TYPE extends AsyncConnection, DATA extends Asyn
     }
 
     public process(socket: CONNECTION_TYPE, data: DATA) {
-        console.log('[CONTROLL] process', data);
+        Log.log('[CONTROLL] process: ' + JSON.stringify(data, null, 2));
         try {
             const message = readClientMessage(data);
             switch (message.type) {

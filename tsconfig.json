@@ -21,5 +21,9 @@
     "rootDir": "src",
     "types": ["node"],
     "jsx": "react"
-  }
+  },
+  "include": [
+    "node_modules/@types/jest/index.d.ts",
+    "src"
+  ]
 }

@@ -1,27 +1,16 @@
 import {
-    Config,
-    UserSource,
+    Backbone, Daemon,
+    GlobalConfig,
     OrganizationSource,
-    TeamReference,
+    Renderer,
+    RepoReference, TeamReference,
     UserReference,
-    RepoReference
-} from './config-types';
+    UserSource
+} from "./config-types";
+import {Validation, left, right, isLeft, isRight} from "./validation";
+import {Errors} from "./config-validator";
 
-export type Left<T> = { readonly _tag: 'left';  left: T; };
-export type Right<T> = { readonly _tag: 'right';  right: T; };
-export type Errors = Array<string>;
-export type Validation<ERROR, DATA> = Left<ERROR> | Right<DATA>
-const left = <T>(value: T) => ({ _tag: 'left', left: value }) as Left<T>;
-const right = <T>(value: T) => ({ _tag: 'right', right: value }) as Right<T>;
-
-export function isLeft<ERROR, DATA>(validation: Validation<ERROR, DATA>): validation is Left<ERROR> {
-    return validation._tag === 'left';
-}
-export function isRight<ERROR, DATA>(validation: Validation<ERROR, DATA>): validation is Right<DATA> {
-    return validation._tag === 'right';
-}
-
-function validate_ignore_list(config: any, context: string): Validation<Errors, Array<RepoReference | UserReference>> {
+export function validate_ignore_list(config: any, context: string): Validation<Errors, Array<RepoReference | UserReference>> {
     const errors: Array<string> = [];
     const ignore: Array<RepoReference | UserReference> = [];
 
@@ -54,7 +43,7 @@ function validate_ignore_list(config: any, context: string): Validation<Errors, 
     }
 }
 
-function validate_include_list(config: any, context: string): Validation<Errors, Array<TeamReference | RepoReference>> {
+export function validate_include_list(config: any, context: string): Validation<Errors, Array<TeamReference | RepoReference>> {
     const errors: Array<string> = [];
     const include: Array<TeamReference | RepoReference> = [];
 
@@ -88,7 +77,7 @@ function validate_include_list(config: any, context: string): Validation<Errors,
     }
 }
 
-function validate_user_config(config: any, context: string): Validation<Errors, UserSource> {
+export function validate_user_config(config: any, context: string): Validation<Errors, UserSource> {
     const errors: Array<string> = [];
     if (typeof config.username !== 'string') {
         errors.push(`'${context}.username' must be a string`);
@@ -111,7 +100,7 @@ function validate_user_config(config: any, context: string): Validation<Errors, 
     }
 }
 
-function validate_org_config(config: any, context: string): Validation<Errors, OrganizationSource> {
+export function validate_org_config(config: any, context: string): Validation<Errors, OrganizationSource> {
     const errors: Array<string> = [];
     if (typeof config.organization !== 'string') {
         errors.push(`'${context}.organization' must be a string`);
@@ -143,14 +132,14 @@ function validate_org_config(config: any, context: string): Validation<Errors, O
     }
 }
 
-export default function validate(config: any): Validation<Errors, Config> {
-    const errors: Array<string> = [];
-    const validated_config: Config = { sources: [] };
+export function validate_sources(config: any): Validation<Errors, Array<UserSource | OrganizationSource>> {
     if (!config || !config.hasOwnProperty('sources')) {
         return left(["Yaml must contains a 'sources' property."])
-    } else if (config.sources.length === 0) {
-        return left(["'sources' property cannot have zero length."])
+    } else if (!Array.isArray(config.sources) || config.sources.length === 0) {
+        return left(["'sources' must be an array of non-zero length."])
     }
+    const validated_sources: Array<UserSource | OrganizationSource> = [];
+    const errors: Errors = [];
     for (let i = 0; i < config.sources.length; i++) {
         const source = config.sources[i];
         const context = `sources[${i}]`;
@@ -164,14 +153,14 @@ export default function validate(config: any): Validation<Errors, Config> {
         if (has_username) {
             const validated_source = validate_user_config(source, context);
             if (isRight(validated_source)) {
-                validated_config.sources.push(validated_source.right);
+                validated_sources.push(validated_source.right);
             } else {
                 errors.push(...validated_source.left);
             }
         } else if (has_organization) {
             const validated_source = validate_org_config(source, context);
             if (isRight(validated_source)) {
-                validated_config.sources.push(validated_source.right);
+                validated_sources.push(validated_source.right);
             } else {
                 errors.push(...validated_source.left);
             }
@@ -181,6 +170,77 @@ export default function validate(config: any): Validation<Errors, Config> {
     if (errors.length > 0) {
         return left(errors);
     } else {
-        return right(validated_config);
+        return right(validated_sources);
+    }
+}
+
+export function validate_global_config(config: any): Validation<Errors, GlobalConfig> {
+    const errors: Array<string> = [];
+    let validated_ignore: Array<RepoReference | UserReference> = [];
+    let validated_renderer: Renderer = 'terminal';
+    let validated_backbone: Backbone = 'ws';
+    let validated_daemon: boolean = false;
+    if (config === undefined || config === null) {
+        return right({
+            ignore: validated_ignore,
+            renderer: validated_renderer,
+            backbone: validated_backbone,
+            daemon: validated_daemon
+        });
+    }
+
+    const ignore_list = config.ignore ?? [];
+    const ignore_validation = validate_ignore_list(config.ignore ?? [], 'config');
+    if (isRight(ignore_validation)) {
+        validated_ignore = ignore_validation.right;
+    } else {
+        errors.push(...ignore_validation.left);
+    }
+
+    if (config.hasOwnProperty('renderer')) {
+        const renderer = config.renderer;
+        if (Renderer.includes(renderer)) {
+            validated_renderer = renderer;
+        } else {
+            errors.push(`'config.renderer' is required to be one of: ${Renderer.join(', ')}`);
+        }
+    }
+
+    if (config.hasOwnProperty('backbone')) {
+        const backbone = config.backbone;
+        if (Backbone.includes(backbone)) {
+            validated_backbone = backbone;
+        } else {
+            errors.push(`'config.backbone' is required to be one of: ${Backbone.join(', ')}`);
+        }
+    }
+
+    if (config.hasOwnProperty('daemon')) {
+        const daemon = config.daemon;
+        if (Daemon.includes(daemon)) {
+            validated_daemon = daemon.toLocaleString() === 'true';
+        } else {
+            errors.push(`'config.daemon' is required to be one of: ${Daemon.join(', ')}`);
+        }
+    }
+
+    if (validated_backbone === 'eventemitter') {
+        if (validated_daemon) {
+            errors.push(`'config.daemon' cannot be true when using 'eventemitter' backbone`);
+        }
+        if (validated_renderer === 'web') {
+            errors.push(`'config.renderer' cannot be 'web' when using 'eventemitter' backbone`);
+        }
+    }
+
+    if (errors.length > 0) {
+        return left(errors);
+    } else {
+        return right({
+            ignore: validated_ignore,
+            renderer: validated_renderer,
+            backbone: validated_backbone,
+            daemon: validated_daemon
+        });
     }
 }

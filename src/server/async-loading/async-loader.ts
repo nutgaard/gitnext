@@ -3,14 +3,15 @@ import Yaml, {FAILSAFE_SCHEMA, YAMLException} from 'js-yaml';
 import AsyncController from "./async-controller";
 import {ServerSentEvents, ServerSentMessages} from "../../common/ws-message-formats";
 import {PrioritizedPullRequest, PullRequest, Repository, UpdateState} from "../../domain";
-import {getConfigLocation, writeDefaultConfig} from "../../config-loader";
-import validate, {Errors, isLeft, Validation} from "../../config-validator";
+import {getConfigLocation, writeDefaultConfig} from "../../config/config-loader";
 import * as GH from "../../gh-utils";
-import {Config, OrganizationSource, UserSource} from "../../config-types";
+import {ConfigV1, OrganizationSource, UserSource} from "../../config/config-types";
 import {AuthToken, WhoAmI} from "../../gh-utils";
 import * as GithubQueryBuilder from "../../github-graphql-query-builder";
 import * as Fetcher from "../../github-graphql-fetcher";
 import {pull_request_classifier_factory, uniqueBy} from "../../data-utils";
+import validators, {Errors} from "../../config/config-validator";
+import {isLeft, Validation} from "../../config/validation";
 
 async function sleep(ms: number): Promise<void> {
     return new Promise((resolve) => {
@@ -51,7 +52,7 @@ export default class AsyncLoader {
 type Loader<RETURN = void> = AsyncGenerator<ServerSentMessages, RETURN, void>;
 async function* loader(): Loader {
     try {
-        const config: Config = yield* loadConfig();
+        const config: ConfigV1 = yield* loadConfig();
         await sleep(1000);
         const user: WhoAmI = yield* verifyUser();
         await sleep(1000);
@@ -76,7 +77,7 @@ async function* loader(): Loader {
     }
 }
 
-async function* loadConfig(): Loader<Config> {
+async function* loadConfig(): Loader<ConfigV1> {
     yield { type: ServerSentEvents.LOADING_CONFIG };
     const config_location = getConfigLocation();
     if (!fs.existsSync(config_location)) {
@@ -86,7 +87,7 @@ async function* loadConfig(): Loader<Config> {
     const config_source = fs.readFileSync(config_location, 'utf8');
 
     let yamlException: YAMLException | null = null;
-    const raw_config = Yaml.load(config_source, {
+    const raw_config: any = Yaml.load(config_source, {
         filename: config_location,
         onWarning(exception: YAMLException) {
             yamlException = exception;
@@ -96,10 +97,12 @@ async function* loadConfig(): Loader<Config> {
     if (yamlException !== null) {
         yield { type: ServerSentEvents.ERROR, error: (yamlException as YAMLException).message };
     } else {
-        const config: Validation<Errors, Config> = validate(raw_config);
+        const version = raw_config?.version || 'beta';
+        const config: Validation<Errors, ConfigV1> = validators[version](raw_config);
         if (isLeft(config)) {
             yield { type: ServerSentEvents.ERROR, error: config.left.join('\n') };
         } else {
+            yield { type: ServerSentEvents.LOADED_CONFIG };
             return config.right
         }
     }
@@ -120,7 +123,7 @@ async function* getToken(): Loader<AuthToken> {
     return token;
 }
 
-async function* loadStoredData(config: Config): Loader<PrioritizedPullRequest[]> {
+async function* loadStoredData(config: ConfigV1): Loader<PrioritizedPullRequest[]> {
     yield { type: ServerSentEvents.LOADING_STORED_DATA };
     const data: PrioritizedPullRequest[] = [];
     yield { type: ServerSentEvents.LOADED_STORED_DATA, data };
@@ -133,7 +136,7 @@ function isUserSource(source: UserSource | OrganizationSource): source is UserSo
 function isOrganizationSource(source: UserSource | OrganizationSource): source is OrganizationSource {
     return source.hasOwnProperty('organization');
 }
-async function* loadUserData(user: WhoAmI, token: AuthToken, config: Config): Loader<PullRequest[]> {
+async function* loadUserData(user: WhoAmI, token: AuthToken, config: ConfigV1): Loader<PullRequest[]> {
     yield { type: ServerSentEvents.LOADING_USER_DATA };
 
     const queries: Promise<PullRequest[]>[] = config.sources
@@ -147,7 +150,7 @@ async function* loadUserData(user: WhoAmI, token: AuthToken, config: Config): Lo
     return combined;
 }
 
-async function* loadOrganizationData(user: WhoAmI, token: AuthToken, config: Config): Loader<PullRequest[]> {
+async function* loadOrganizationData(user: WhoAmI, token: AuthToken, config: ConfigV1): Loader<PullRequest[]> {
     yield { type: ServerSentEvents.LOADING_ORG_DATA };
     const queries: Promise<PullRequest[]>[] = config.sources
         .filter(isOrganizationSource)

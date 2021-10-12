@@ -1,5 +1,5 @@
 import fs from 'fs';
-import {Config, OrganizationSource, RepoReference, TeamReference, UserSource} from "./config-types";
+import {ConfigV1, OrganizationSource, RepoReference, TeamReference, UserSource} from "./config/config-types";
 import {exit_error} from "./program-utils";
 import * as GithubGraphQLHandler from './github-graphql-query-response-handler';
 import {PullRequest} from "./domain";
@@ -117,7 +117,7 @@ export function build_org_query(user: string, config: OrganizationSource): Query
 
 
 
-export function build_query(user: string, config: Config): Query[] {
+export function build_query(user: string, config: ConfigV1): Query[] {
     return config.sources.map((config_element) => {
         const handler = config_handlers.find((handler) => handler.predicate(config_element));
         if (handler) {

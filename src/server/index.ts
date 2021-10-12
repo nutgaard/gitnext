@@ -1,3 +1,4 @@
+import * as Log from './logging';
 import daemon from './daemon';
 
 switch (process.argv[2]) {
@@ -16,11 +17,11 @@ switch (process.argv[2]) {
     case "status":
         const pid = daemon.status();
         if (pid) {
-            console.log('Daemon is running. PID:', pid);
+            Log.log('Daemon is running. PID:' + pid);
         } else {
-            console.log('Daemon is not running.')
+            Log.log('Daemon is not running.')
         }
         break;
     default:
-        console.log('Usage: start|stop|kill|restart|status');
+        Log.log('Usage: start|stop|kill|restart|status');
 }

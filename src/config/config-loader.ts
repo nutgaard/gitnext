@@ -3,14 +3,16 @@ import path from "path";
 import os from "os";
 import { green, cyan } from 'chalk';
 import Yaml, {FAILSAFE_SCHEMA, YAMLException} from "js-yaml";
-import validate, {Errors, isLeft, Validation} from "./config-validator";
-import {Config} from "./config-types";
-import {exit_error, error_message} from "./program-utils";
-import { useTestConfig } from './program-config';
+import validateV1Config, {Errors} from "./config-validator";
+import {ConfigV1} from "./config-types";
+import {exit_error, error_message} from "../program-utils";
+import { useTestConfig } from '../program-config';
+import {isLeft, Validation} from "./validation";
+import validators from "./config-validator";
 
-const defaultConfig = fs.readFileSync(__dirname + '/default-config.yaml', 'utf8');
 
 export function writeDefaultConfig(){
+    const defaultConfig = fs.readFileSync(__dirname + '/default-config.yaml', 'utf8');
     const location = getConfigLocation();
     const exists = fs.existsSync(location);
     if (exists){
@@ -31,8 +33,8 @@ export function getConfigLocation(): string {
     return config_source;
 }
 
-export function load_and_validate(): Config {
-    const value: Validation<Errors, Config> = load_and_validate_raw(getConfigLocation());
+export function load_and_validate(): ConfigV1 {
+    const value: Validation<Errors, ConfigV1> = load_and_validate_raw(getConfigLocation());
     if (isLeft(value)) {
         exit_error(value.left.join('\n'));
         throw new Error("just here to inform TS");
@@ -41,12 +43,12 @@ export function load_and_validate(): Config {
     }
 }
 
-export function load_and_validate_raw(filename: string): Validation<Errors, Config> {
+export function load_and_validate_raw(filename: string): Validation<Errors, ConfigV1> {
     if (!fs.existsSync(filename)) {
         writeDefaultConfig();
     }
     const source = fs.readFileSync(filename, 'utf8');
-    const config = Yaml.load(source, {
+    const config: any = Yaml.load(source, {
         filename,
         onWarning(e: YAMLException) {
             exit_error(error_message(e));
@@ -54,5 +56,6 @@ export function load_and_validate_raw(filename: string): Validation<Errors, Conf
         schema: FAILSAFE_SCHEMA
     });
 
-    return validate(config);
+    const version = config?.version || 'beta';
+    return validators[version](config);
 }

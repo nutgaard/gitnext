@@ -1,3 +1,4 @@
+import * as Log from './logging';
 const daemon = require('daemonize2').setup({
     main: 'server.js',
     name: 'gitnext-daemon',
@@ -6,25 +7,25 @@ const daemon = require('daemonize2').setup({
 
 daemon
     .on("starting", function() {
-        console.log("Starting daemon...");
+        Log.log("Starting daemon...");
     })
     .on("started", function(pid: string) {
-        console.log("Daemon started. PID: " + pid);
+        Log.log("Daemon started. PID: " + pid);
     })
     .on("stopping", function() {
-        console.log("Stopping daemon...");
+        Log.log("Stopping daemon...");
     })
     .on("stopped", function() {
-        console.log("Daemon stopped.");
+        Log.log("Daemon stopped.");
     })
     .on("running", function(pid: string) {
-        console.log("Daemon already running. PID: " + pid);
+        Log.log("Daemon already running. PID: " + pid);
     })
     .on("notrunning", function() {
-        console.log("Daemon is not running");
+        Log.log("Daemon is not running");
     })
     .on("error", function(err: Error) {
-        console.log("Daemon failed to start:  " + err.message);
+        Log.log("Daemon failed to start:  " + err.message);
     });
 
 

@@ -1,5 +1,5 @@
 import emojiStrip from "emoji-strip";
-import {OrganizationSource, RepoReference, UserReference, UserSource} from "./config-types";
+import {OrganizationSource, RepoReference, UserReference, UserSource} from "./config/config-types";
 import * as GithubGraphqlType from './github-graphql-type';
 import {exit_error} from "./program-utils";
 import { PullRequest, Review } from './domain';

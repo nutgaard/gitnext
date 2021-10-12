@@ -3,7 +3,8 @@ import {AppProps, Box, Key, Text, useApp} from 'ink';
 import open from 'open';
 import {PrioritizedPullRequest} from "../domain";
 import {Hotkey, useHotkeys} from "./use-hotkeys";
-import {Phase} from "./use-loader";
+import {Phase} from "./use-async-loader";
+import * as Log from '../server/logging';
 
 interface HotkeyContext {
     pullRequest: PrioritizedPullRequest | undefined;
@@ -23,7 +24,9 @@ const exitHandler: Hotkey<HotkeyContext> = {
         return true;
     },
     execute(context: HotkeyContext): void {
+        Log.log('ActionSelector got exit hotkey');
         context.app.exit();
+        process.exit(0);
     }
 }
 const updateHandler: Hotkey<HotkeyContext> = {

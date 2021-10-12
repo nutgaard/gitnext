@@ -1,5 +1,7 @@
 import EventEmitter from "events";
 import AsyncController, {AsyncConnection, AsyncConnectionFactory, AsyncData} from "./async-controller";
+import * as Log from '../logging';
+import {ConfigV1} from "../../config/config-types";
 
 enum EventEmitterConnectionMode {
     SERVER= "SERVER", CLIENT = "CLIENT"
@@ -19,12 +21,12 @@ class EventEmitterConnection implements AsyncConnection {
         this.receiveEvent = mode === EventEmitterConnectionMode.SERVER ? 'client-data' : 'server-data';
         this.emitter = emitter;
         this.emitter.on(this.receiveEvent, (data) => {
-            console.log(`[${this.mode}] received: ${this.receiveEvent} ${data}`);
+            Log.log(`[${this.mode}] received: ${this.receiveEvent} ${data}`);
         });
     }
 
     send(data: string): void {
-        console.log(`[${this.mode}] sending: ${this.sendEvent} ${data}`);
+        Log.log(`[${this.mode}] sending: ${this.sendEvent} ${data}`);
         this.emitter.emit(this.sendEvent, data);
     }
 
@@ -53,6 +55,8 @@ export async function startEventEmitter(): Promise<AsyncConnectionFactory> {
     return {
         connect(): AsyncConnection {
             return client;
+        },
+        exit() {
         }
     };
 }

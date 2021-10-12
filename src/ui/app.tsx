@@ -4,16 +4,19 @@ import {PrioritizedPullRequest} from "../domain";
 import Logo from "./logo";
 import useFullscreen, {Context as ScreenSizeContext} from "./fullscreen";
 import ActionSelector from "./action-selector";
-import {LoaderComponent, Phase, useLoader} from "./use-loader";
+import Loader from "./loader";
+import {Phase} from "./use-async-loader";
 import PullRequestListViewer from "./pull-request-list-viewer";
+import {AsyncConnectionFactory} from "../server/async-loading/async-controller";
+import {useAsyncLoader} from "./use-async-loader";
 
 interface Props {
-    // pullRequests: PrioritizedPullRequest[]
+    connectionFactory: AsyncConnectionFactory;
 }
 
 function App(props: Props) {
     const size = useFullscreen();
-    const data = useLoader()
+    const data =useAsyncLoader(props.connectionFactory);
     const [selectedPullRequest, setSelectedPullRequest] = useState<PrioritizedPullRequest | undefined>(undefined);
     const content = data.phase === Phase.DONE && data.data
         ? (
@@ -23,7 +26,7 @@ function App(props: Props) {
                 setSelectedPullRequest={setSelectedPullRequest}
             />
         )
-        : <LoaderComponent {...data} />;
+        : <Loader {...data} />;
 
     return (
         <ScreenSizeContext.Provider value={size}>
