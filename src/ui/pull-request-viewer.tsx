@@ -48,6 +48,7 @@ function PullRequestViewer(props: Props) {
         {title: 'Author', content: pullRequest.author},
         {title: 'Updated', content: timeAgo.format(lastUpdated) },
         {title: 'URL', content: pullRequest.url},
+        {title: 'Source', content: pullRequest.from},
         {title: 'Target', content: pullRequest.to, marginBottom: 1},
         {
             title: 'Body',

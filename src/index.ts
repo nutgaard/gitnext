@@ -15,10 +15,10 @@ if (debugMode) {
     // Allows us to use the fullscreen without clearing existing data
     const enterAltScreenCommand = "\x1b[?1049h";
     const leaveAltScreenCommand = "\x1b[?1049l";
-    process.stdout.write(enterAltScreenCommand);
+    // process.stdout.write(enterAltScreenCommand);
     process.on("exit", () => {
         console.log('exiting');
-        process.stdout.write(leaveAltScreenCommand);
+        // process.stdout.write(leaveAltScreenCommand);
     });
 
     const view = React.createElement(App);

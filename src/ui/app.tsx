@@ -1,20 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Box} from 'ink'
+import { version } from "./../program-config";
 import {PrioritizedPullRequest} from "../domain";
 import Logo from "./logo";
 import useFullscreen, {Context as ScreenSizeContext} from "./fullscreen";
 import ActionSelector from "./action-selector";
 import {LoaderComponent, Phase, useLoader} from "./use-loader";
 import PullRequestListViewer from "./pull-request-list-viewer";
+import {useResettingState} from "./use-resetting-state";
 
-interface Props {
-    // pullRequests: PrioritizedPullRequest[]
-}
-
-function App(props: Props) {
+function App() {
     const size = useFullscreen();
     const data = useLoader()
     const [selectedPullRequest, setSelectedPullRequest] = useState<PrioritizedPullRequest | undefined>(undefined);
+    const [actionHighlight, setActionHighlight] = useResettingState(version, 2500);
     const content = data.phase === Phase.DONE && data.data
         ? (
             <PullRequestListViewer
@@ -34,6 +33,8 @@ function App(props: Props) {
                     selectedPullRequest={selectedPullRequest}
                     reload={data.reload}
                     phase={data.phase}
+                    actionHighlight={actionHighlight}
+                    setActionHighlight={setActionHighlight}
                 />
             </Box>
         </ScreenSizeContext.Provider>
