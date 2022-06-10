@@ -6,12 +6,13 @@ import * as GithubQueryBuilder from "../github-graphql-query-builder";
 import {Query} from "../github-graphql-query-builder";
 import {PrioritizedPullRequest, PullRequest, Repository, UpdateState} from "../domain";
 import * as Fetcher from "../github-graphql-fetcher";
-import {pull_request_classifier_factory, uniqueBy} from "../data-utils";
+import {create_pull_request_blocking_map, pull_request_classifier_factory, uniqueBy} from "../data-utils";
 import React, {useCallback, useEffect, useState} from "react";
 import Spinner from "ink-spinner";
 import {Box, Text} from "ink";
 import {useScreenSize} from "./fullscreen";
 import {error_message} from '../program-utils';
+import {log} from "../logging";
 
 export enum Phase {
     INIT = 'Initializing...',
@@ -141,9 +142,11 @@ export function useLoader(): LoaderData {
                         return;
                     }
                     case Phase.GET_DATA_3: {
-                        const pr_classifier = pull_request_classifier_factory(whoami!!.name)
+                        const pr_classifier = pull_request_classifier_factory(whoami!!.name);
+                        const blocking_map = create_pull_request_blocking_map(pullRequests);
+                        log('blocking_map: ' + JSON.stringify(blocking_map));
                         const prs_prioritized: PrioritizedPullRequest[] = pullRequests!!
-                            .map((pr) => ({...pr, priority: pr_classifier(pr)}))
+                            .map((pr) => ({...pr, priority: pr_classifier(pr, blocking_map)}))
                             .sort((a, b) => b.priority - a.priority);
                         setPullRequests(prs_prioritized);
                         setPhase(Phase.DONE);

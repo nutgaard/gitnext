@@ -26,6 +26,8 @@ function followUp(priority: Priority): string {
             return "Your PR has an RFC. Maybe something to do here?"
         case Priority.APPROVED_PR_FROM_USER:
             return "Your PR has been approved. Merge it?"
+        case Priority.BLOCKED_PR:
+            return "PR is potentially blocked. Target has outgoing PR to another branch."
         case Priority.PENDING_PR_FROM_USER:
             return "Your PR has no reviews :( "
         case Priority.PR_REJECTED_BY_USER:

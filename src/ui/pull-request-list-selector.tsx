@@ -1,9 +1,10 @@
 import React, {useEffect} from 'react';
-import {Box, Text, Spacer} from 'ink'
-import {PrioritizedPullRequest, UpdateState} from "../domain";
+import {Box, Spacer, Text} from 'ink'
+import {PrioritizedPullRequest, Priority, UpdateState} from "../domain";
 import Select, {ItemProps} from 'ink-select-input';
 import * as style from './style';
 import {ellipsis} from "./text-utils";
+import {gradientStart} from "./style";
 
 interface Props {
     columns: number;
@@ -25,7 +26,9 @@ const Item: React.FC<ItemProps> = (props: ItemProps) => {
     // Needed hack to bypass restriction in typesetting
     const castedProps = props as ( ItemProps & { value: PrioritizedPullRequest });
     let updated = <Text>  </Text>;
-    if (castedProps.value.update_state === UpdateState.NEW) {
+    if (castedProps.value.priority == Priority.BLOCKED_PR) {
+        updated = <Text color={style.gradientStart}>★ </Text>
+    } else if (castedProps.value.update_state === UpdateState.NEW) {
         updated = <Text color={style.greenAccent}>★ </Text>
     } else if (castedProps.value.update_state === UpdateState.UPDATED) {
         updated = <Text color={style.gradientEnd}>★ </Text>
@@ -76,9 +79,13 @@ function PullRequestListSelector(props: Props) {
                     <Text color={style.greenAccent}>★ </Text>
                     <Text>New</Text>
                 </Box>
-                <Box>
+                <Box marginRight={4}>
                     <Text color={style.gradientEnd}>★ </Text>
                     <Text>Changed</Text>
+                </Box>
+                <Box>
+                    <Text color={style.gradientStart}>★ </Text>
+                    <Text>Blocked</Text>
                 </Box>
             </Box>
         </Box>
