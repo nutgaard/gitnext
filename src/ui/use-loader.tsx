@@ -6,7 +6,12 @@ import * as GithubQueryBuilder from "../github-graphql-query-builder";
 import {Query} from "../github-graphql-query-builder";
 import {PrioritizedPullRequest, PullRequest, Repository, UpdateState} from "../domain";
 import * as Fetcher from "../github-graphql-fetcher";
-import {create_pull_request_blocking_map, pull_request_classifier_factory, uniqueBy} from "../data-utils";
+import {
+    create_pull_request_blocking_map,
+    pull_request_blocker_key,
+    pull_request_classifier_factory,
+    uniqueBy
+} from "../data-utils";
 import React, {useCallback, useEffect, useState} from "react";
 import Spinner from "ink-spinner";
 import {Box, Text} from "ink";
@@ -113,8 +118,10 @@ export function useLoader(): LoaderData {
                                 return acc;
                             }, {} as Record<string, PrioritizedPullRequest>);
 
-                        const all_pullrequets: PrioritizedPullRequest[] = data
-                            .reduce((a, b) => a.concat(b), [])
+                        const new_pullrequests: Array<PullRequest> = data
+                            .reduce((a, b) => a.concat(b), []);
+                        const blocking_map = create_pull_request_blocking_map(new_pullrequests);
+                        const all_pullrequests: PrioritizedPullRequest[] = new_pullrequests
                             .filter((pr) => !pr.isDraft)
                             .map((pr, i) => {
                                 let update_state = UpdateState.NO_CHANGE;
@@ -126,11 +133,13 @@ export function useLoader(): LoaderData {
                                 } else if (hasBeenDone && previous.updatedAt !== pr.updatedAt) {
                                     update_state = UpdateState.UPDATED
                                 }
-                                return ({...pr, priority: 0, update_state });
+                                const blocker_key = pull_request_blocker_key(pr, false);
+                                const blocked = blocking_map[blocker_key] !== undefined;
+                                return ({...pr, priority: 0, update_state, blocked });
                             });
-                        const all_repos: Repository[] = all_pullrequets.map((pr) => pr.baseRepository)
+                        const all_repos: Repository[] = all_pullrequests.map((pr) => pr.baseRepository)
 
-                        setPullRequests(uniqueBy(all_pullrequets, (pr) => pr.url));
+                        setPullRequests(uniqueBy(all_pullrequests, (pr) => pr.url));
                         setRepositories(all_repos);
                         setPhase(Phase.GET_DATA_2);
                         return;
@@ -143,10 +152,8 @@ export function useLoader(): LoaderData {
                     }
                     case Phase.GET_DATA_3: {
                         const pr_classifier = pull_request_classifier_factory(whoami!!.name);
-                        const blocking_map = create_pull_request_blocking_map(pullRequests);
-                        log('blocking_map: ' + JSON.stringify(blocking_map));
                         const prs_prioritized: PrioritizedPullRequest[] = pullRequests!!
-                            .map((pr) => ({...pr, priority: pr_classifier(pr, blocking_map)}))
+                            .map((pr) => ({...pr, priority: pr_classifier(pr)}))
                             .sort((a, b) => b.priority - a.priority);
                         setPullRequests(prs_prioritized);
                         setPhase(Phase.DONE);

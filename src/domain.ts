@@ -23,7 +23,6 @@ export enum Priority {
     NO_NEED_FOR_ACTION = 0,
     PR_REJECTED_BY_USER = 10,
     PENDING_PR_FROM_USER = 60,
-    BLOCKED_PR = 65,
     APPROVED_PR_FROM_USER = 70,
     REJECTED_PR_FROM_USER = 80,
     MISSING_REVIEW_FROM_USER = 90,
@@ -37,7 +36,8 @@ export enum UpdateState {
 
 export interface PrioritizedPullRequest extends PullRequest {
     priority: Priority;
-    update_state: UpdateState
+    blocked: boolean;
+    update_state: UpdateState;
 }
 
 export interface Review {

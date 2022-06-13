@@ -26,7 +26,7 @@ const Item: React.FC<ItemProps> = (props: ItemProps) => {
     // Needed hack to bypass restriction in typesetting
     const castedProps = props as ( ItemProps & { value: PrioritizedPullRequest });
     let updated = <Text>  </Text>;
-    if (castedProps.value.priority == Priority.BLOCKED_PR) {
+    if (castedProps.value.blocked) {
         updated = <Text color={style.gradientStart}>★ </Text>
     } else if (castedProps.value.update_state === UpdateState.NEW) {
         updated = <Text color={style.greenAccent}>★ </Text>
