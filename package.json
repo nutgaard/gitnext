@@ -1,6 +1,6 @@
 {
   "name": "@nutgaard/gitnext",
-  "version": "0.0.1-beta.17",
+  "version": "0.0.1-beta.18",
   "description": "Small cli to help prioritize your github tasks",
   "main": "./lib/index.js",
   "bin": {
@@ -13,7 +13,7 @@
   "scripts": {
     "start": "npm run build && node lib/index.js",
     "create": "npm run build && npm run test",
-    "build": "npm run build:clean && npm run build:tsc && npm run build:copy-resources",
+    "build": "npm run build:clean && node _scripts/write-version-file.js && npm run build:tsc && npm run build:copy-resources",
     "build:clean": "rm -rf lib",
     "build:tsc": "tsc -p .",
     "build:copy-resources": "cp -r src/graphql-queries lib && cp src/default-config.yaml lib"
@@ -38,8 +38,7 @@
     "js-yaml": "^4.0.0",
     "meow": "^9.0.0",
     "open": "8.0.2",
-    "react": "^17.0.1",
-    "read-pkg-up": "^7.0.1"
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "@types/chalk": "^2.2.0",

@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Box} from 'ink'
-import { version } from "./../program-config";
+import version from "./../version";
 import {PrioritizedPullRequest} from "../domain";
 import Logo from "./logo";
 import useFullscreen, {Context as ScreenSizeContext} from "./fullscreen";

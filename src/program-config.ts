@@ -1,5 +1,5 @@
 import meow  from 'meow';
-import readPkgUp from 'read-pkg-up';
+import version from './version';
 
 interface CliFlags extends meow.AnyFlags {
     stacktrace: meow.BooleanFlag;
@@ -15,10 +15,6 @@ const usage = `
        
 `;
 
-const pkg = readPkgUp.sync({
-    normalize: false
-});
-export const version = pkg?.packageJson?.version ?? 'Unknown version';
 const options: meow.Options<CliFlags> = {
     version,
     flags: {
