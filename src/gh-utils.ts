@@ -37,24 +37,17 @@ export async function findAuthToken(): Promise<AuthToken> {
     if (useFixtures) {
         res = await Fixtures.token();
     } else {
-        const auth_status = await exec('gh auth status', ['STDERR', 'STDOUT']);
-        const auth_line = auth_status
+        const auth_status = await exec('gh auth status --show-token', ['STDERR', 'STDOUT']);
+        const token_line = auth_status
             .split('\n')
-            .find((line) => line.includes('Logged in to '));
+            .find((line) => line.includes('Token: '));
 
-        if (auth_line) {
-            const match = auth_line.match(/\((.+)\)/);
-            if (match) {
-                const tokenLocation = match[1];
-                const ghAuthData = fs.readFileSync(tokenLocation, 'utf8');
-                const tokenMatch = ghAuthData.match(/oauth_token: ([\w\d]+)/);
-                if (tokenMatch) {
-                    res = { token: tokenMatch[1] };
-                } else {
-                    exit_error('Authentication status failed, could not extract token ' + tokenLocation);
-                }
+        if (token_line) {
+            const token_match = token_line.match(/Token: (.+)/);
+            if (token_match) {
+                res = { token: token_match[1] };
             } else {
-                exit_error('Authentication status failed, could not extract location from "gh auth status".');
+                exit_error('Authentication status failed, could not extract location from "gh auth status".')
             }
         } else {
             exit_error('Authentication status failed, check the response of running "gh auth status".');
