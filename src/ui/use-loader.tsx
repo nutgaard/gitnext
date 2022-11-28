@@ -88,6 +88,7 @@ export function useLoader(): LoaderData {
                 switch (phase) {
                     case Phase.INIT: {
                         setPhase(Phase.LOAD_CONFIG);
+                        setError(undefined);
                         return;
                     }
                     case Phase.LOAD_CONFIG: {
